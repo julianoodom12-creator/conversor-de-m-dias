@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor Universal — Vídeo, Áudio, Imagem</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 20px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; color: #58a6ff; margin-bottom: 4px; }
+  .subtitle { font-size: 0.85rem; color: #8b949e; margin-bottom: 20px; border-bottom: 1px solid #21262d; padding-bottom: 12px; }
+  h2 { font-size: 1.1rem; color: #f0883e; margin: 24px 0 12px; }
+  h3 { font-size: 0.95rem; color: #58a6ff; margin-bottom: 10px; }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label { display: block; font-size: 0.75rem; color: #8b949e; margin-bottom: 4px; margin-top: 10px; }
+  input, select {
+    width: 100%;
+    padding: 8px 10px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #c9d1d9;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  input:focus, select:focus { outline: none; border-color: #58a6ff; }
+  button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 12px;
+    background: #238636;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  button:hover { background: #2ea043; }
+  button:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+  .btn-secondary { background: #1f6feb; }
+  .btn-secondary:hover { background: #388bfd; }
+  .btn-download { background: #8957e5; font-size: 1.05rem; padding: 14px; margin-top: 16px; }
+  .btn-download:hover { background: #9d6ff0; }
+  .btn-warn { background: #9e6a03; }
+  .btn-warn:hover { background: #bb8009; }
+  .drop-zone {
+    border: 2px dashed #30363d;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-top: 8px;
+  }
+  .drop-zone:hover { border-color: #58a6ff; background: #1f6feb11; }
+  .drop-zone.dragover { border-color: #58a6ff; background: #1f6feb22; }
+  .drop-zone .icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .drop-zone .text { font-size: 0.95rem; color: #c9d1d9; }
+  .drop-zone .hint { font-size: 0.75rem; color: #8b949e; margin-top: 6px; }
+  .file-info {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 14px;
+    margin-top: 12px;
+    display: none;
+  }
+  .file-info.show { display: block; }
+  .file-info strong { color: #58a6ff; font-size: 0.95rem; display: block; word-break: break-all; }
+  .file-info .meta { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
+  .notice {
+    background: #1c2128;
+    border-left: 3px solid #f0883e;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.8rem;
+    color: #8b949e;
+    margin: 16px 0;
+  }
+  .notice strong { color: #f0883e; }
+  .notice-green {
+    background: #1c2128;
+    border-left: 3px solid #238636;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.8rem;
+    color: #8b949e;
+    margin: 16px 0;
+  }
+  .notice-green strong { color: #3fb950; }
+  .notice-red {
+    background: #1c2128;
+    border-left: 3px solid #da3633;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.8rem;
+    color: #8b949e;
+    margin: 16px 0;
+  }
+  .notice-red strong { color: #da3633; }
+  .progress-container { margin-top: 16px; display: none; }
+  .progress-container.show { display: block; }
+  .progress-bar {
+    height: 10px;
+    background: #21262d;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #58a6ff, #a371f7, #f778ba);
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 5px;
+  }
+  .progress-text {
+    font-size: 0.8rem;
+    color: #8b949e;
+    margin-top: 6px;
+    text-align: center;
+  }
+  .log {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    color: #8b949e;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: 12px;
+    display: none;
+  }
+  .log.show { display: block; }
+  .log .line { margin: 2px 0; }
+  .log .line.ok { color: #3fb950; }
+  .log .line.err { color: #f85149; }
+  .small { font-size: 0.75rem; color: #8b949e; }
+  .link-list { list-style: none; }
+  .link-list li { margin: 6px 0; }
+  .link-list a { color: #58a6ff; text-decoration: none; }
+  .link-list a:hover { text-decoration: underline; }
+  .option-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .format-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .format-btn {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 10px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    margin: 0;
+    width: 100%;
+    color: #c9d1d9;
+    font-size: 0.8rem;
+  }
+  .format-btn:hover { border-color: #58a6ff; background: #161b22; }
+  .format-btn.selected { border-color: #58a6ff; background: #1f6feb22; color: #58a6ff; font-weight: 600; }
+  .format-btn .ext { display: block; font-size: 1rem; font-weight: 600; }
+  .format-btn .desc { display: block; font-size: 0.65rem; color: #8b949e; margin-top: 2px; }
+  .category-title {
+    font-size: 0.75rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #21262d;
+    padding-bottom: 4px;
+  }
+  .tabs-inner {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .tabs-inner button {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    width: auto;
+    margin: 0;
+    font-weight: 500;
+  }
+  .tabs-inner button:hover { background: #30363d; }
+  .tabs-inner button.active { background: #1f6feb22; border-color: #1f6feb; color: #58a6ff; }
+  audio, video { width: 100%; margin-top: 12px; border-radius: 6px; }
+  img.preview { max-width: 100%; max-height: 300px; border-radius: 6px; margin-top: 12px; display: block; margin-left: auto; margin-right: auto; }
+  .badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+    background: #1f6feb;
+    color: #fff;
+  }
+  .time-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🔄 Conversor Universal</h1>
+  <p class="subtitle">
+    Vídeo, áudio e imagem — conversão 100% local no navegador via FFmpeg.wasm.
+    Nenhum arquivo sai do seu dispositivo.
+  </p>
+
+  <div class="notice-green">
+    <strong>✅ Como funciona:</strong> o arquivo é lido no seu navegador, processado pelo FFmpeg
+    compilado em WebAssembly, e o resultado é baixado sem passar por servidor.
+    Você pode desligar a internet depois que a página carregar.
+  </div>
+
+  <div class="notice">
+    <strong>⚠️ Limites técnicos:</strong>
+    <ul style="margin-left: 20px; margin-top: 6px;">
+      <li>Arquivos até <strong>~2GB</strong> (limite do ArrayBuffer)</li>
+      <li>RAM proporcional ao tamanho — feche outras abas pesadas</li>
+      <li>Vídeos longos podem demorar vários minutos</li>
+      <li>Melhor no <strong>Chrome, Edge e Firefox</strong> (Safari tem suporte parcial)</li>
+      <li>Formatos exóticos podem não estar compilados no build padrão do FFmpeg.wasm</li>
+    </ul>
+  </div>
+
+  <!-- PASSO 1 -->
+  <div class="card">
+    <h3>1. Selecione o arquivo</h3>
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">📁</div>
+      <div class="text">Arraste o arquivo aqui ou clique para selecionar</div>
+      <div class="hint">Vídeo, áudio ou imagem — qualquer formato</div>
+      <input type="file" id="fileInput" accept="video/*,audio/*,image/*" style="display:none">
+    </div>
+
+    <div class="file-info" id="fileInfo">
+      <strong id="fileName">—</strong>
+      <div class="meta" id="fileMeta">—</div>
+    </div>
+  </div>
+
+  <!-- PASSO 2 -->
+  <div class="card" id="stepOptions" style="display:none;">
+    <h3>2. Formato de saída</h3>
+
+    <div class="tabs-inner">
+      <button class="active" onclick="mostrarCategoria('video', this)">🎬 Vídeo</button>
+      <button onclick="mostrarCategoria('audio', this)">🎵 Áudio</button>
+      <button onclick="mostrarCategoria('image', this)">🖼️ Imagem</button>
+    </div>
+
+    <!-- FORMATOS DE VÍDEO -->
+    <div id="cat-video" class="category-content">
+      <div class="category-title">Formatos de vídeo</div>
+      <div class="format-grid">
+        <button class="format-btn" data-format="mp4" onclick="selecionarFormato(this)">
+          <span class="ext">.mp4</span><span class="desc">H.264 + AAC</span>
+        </button>
+        <button class="format-btn" data-format="webm" onclick="selecionarFormato(this)">
+          <span class="ext">.webm</span><span class="desc">VP9 + Opus</span>
+        </button>
+        <button class="format-btn" data-format="mkv" onclick="selecionarFormato(this)">
+          <span class="ext">.mkv</span><span class="desc">Matroska</span>
+        </button>
+        <button class="format-btn" data-format="mov" onclick="selecionarFormato(this)">
+          <span class="ext">.mov</span><span class="desc">QuickTime</span>
+        </button>
+        <button class="format-btn" data-format="avi" onclick="selecionarFormato(this)">
+          <span class="ext">.avi</span><span class="desc">DivX/Xvid</span>
+        </button>
+        <button class="format-btn" data-format="flv" onclick="selecionarFormato(this)">
+          <span class="ext">.flv</span><span class="desc">Flash Video</span>
+        </button>
+        <button class="format-btn" data-format="wmv" onclick="selecionarFormato(this)">
+          <span class="ext">.wmv</span><span class="desc">Windows Media</span>
+        </button>
+        <button class="format-btn" data-format="3gp" onclick="selecionarFormato(this)">
+          <span class="ext">.3gp</span><span class="desc">Mobile 3GPP</span>
+        </button>
+        <button class="format-btn" data-format="ogv" onclick="selecionarFormato(this)">
+          <span class="ext">.ogv</span><span class="desc">Ogg Theora</span>
+        </button>
+        <button class="format-btn" data-format="ts" onclick="selecionarFormato(this)">
+          <span class="ext">.ts</span><span class="desc">MPEG-TS</span>
+        </button>
+        <button class="format-btn" data-format="m4v" onclick="selecionarFormato(this)">
+          <span class="ext">.m4v</span><span class="desc">iTunes Video</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORMATOS DE ÁUDIO -->
+    <div id="cat-audio" class="category-content" style="display:none;">
+      <div class="category-title">Formatos de áudio</div>
+      <div class="format-grid">
+        <button class="format-btn" data-format="mp3" onclick="selecionarFormato(this)">
+          <span class="ext">.mp3</span><span class="desc">MPEG Layer 3</span>
+        </button>
+        <button class="format-btn" data-format="wav" onclick="selecionarFormato(this)">
+          <span class="ext">.wav</span><span class="desc">Waveform PCM</span>
+        </button>
+        <button class="format-btn" data-format="ogg" onclick="selecionarFormato(this)">
+          <span class="ext">.ogg</span><span class="desc">Ogg Vorbis</span>
+        </button>
+        <button class="format-btn" data-format="opus" onclick="selecionarFormato(this)">
+          <span class="ext">.opus</span><span class="desc">Opus Codec</span>
+        </button>
+        <button class="format-btn" data-format="flac" onclick="selecionarFormato(this)">
+          <span class="ext">.flac</span><span class="desc">Lossless</span>
+        </button>
+        <button class="format-btn" data-format="m4a" onclick="selecionarFormato(this)">
+          <span class="ext">.m4a</span><span class="desc">AAC Audio</span>
+        </button>
+        <button class="format-btn" data-format="aac" onclick="selecionarFormato(this)">
+          <span class="ext">.aac</span><span class="desc">AAC raw</span>
+        </button>
+        <button class="format-btn" data-format="wma" onclick="selecionarFormato(this)">
+          <span class="ext">.wma</span><span class="desc">Windows Media Audio</span>
+        </button>
+        <button class="format-btn" data-format="ac3" onclick="selecionarFormato(this)">
+          <span class="ext">.ac3</span><span class="desc">Dolby AC-3</span>
+        </button>
+        <button class="format-btn" data-format="aiff" onclick="selecionarFormato(this)">
+          <span class="ext">.aiff</span><span class="desc">Apple AIFF</span>
+        </button>
+        <button class="format-btn" data-format="amr" onclick="selecionarFormato(this)">
+          <span class="ext">.amr</span><span class="desc">AMR (mobile)</span>
+        </button>
+        <button class="format-btn" data-format="au" onclick="selecionarFormato(this)">
+          <span class="ext">.au</span><span class="desc">Sun Audio</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORMATOS DE IMAGEM -->
+    <div id="cat-image" class="category-content" style="display:none;">
+      <div class="category-title">Formatos de imagem</div>
+      <div class="format-grid">
+        <button class="format-btn" data-format="jpg" onclick="selecionarFormato(this)">
+          <span class="ext">.jpg</span><span class="desc">JPEG</span>
+        </button>
+        <button class="format-btn" data-format="png" onclick="selecionarFormato(this)">
+          <span class="ext">.png</span><span class="desc">Portable Network</span>
+        </button>
+        <button class="format-btn" data-format="webp" onclick="selecionarFormato(this)">
+          <span class="ext">.webp</span><span class="desc">WebP</span>
+        </button>
+        <button class="format-btn" data-format="bmp" onclick="selecionarFormato(this)">
+          <span class="ext">.bmp</span><span class="desc">Bitmap</span>
+        </button>
+        <button class="format-btn" data-format="tiff" onclick="selecionarFormato(this)">
+          <span class="ext">.tiff</span><span class="desc">TIFF</span>
+        </button>
+        <button class="format-btn" data-format="gif" onclick="selecionarFormato(this)">
+          <span class="ext">.gif</span><span class="desc">GIF</span>
+        </button>
+        <button class="format-btn" data-format="ico" onclick="selecionarFormato(this)">
+          <span class="ext">.ico</span><span class="desc">Ícone</span>
+        </button>
+        <button class="format-btn" data-format="ppm" onclick="selecionarFormato(this)">
+          <span class="ext">.ppm</span><span class="desc">Portable Pixmap</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- OPÇÕES AVANÇADAS -->
+    <div id="opcoesAvancadas" style="display:none; margin-top: 20px;">
+      <h3>Opções avançadas</h3>
+
+      <div class="option-row" id="opcoesVideo" style="display:none;">
+        <div>
+          <label>Resolução</label>
+          <select id="resolucao">
+            <option value="">Manter original</option>
+            <option value="3840:2160">4K (3840×2160)</option>
+            <option value="1920:1080">Full HD (1920×1080)</option>
+            <option value="1280:720">HD (1280×720)</option>
+            <option value="854:480">SD (854×480)</option>
+            <option value="640:360">360p (640×360)</option>
+            <option value="320:240">240p (320×240)</option>
+          </select>
+        </div>
+        <div>
+          <label>FPS</label>
+          <select id="fps">
+            <option value="">Manter original</option>
+            <option value="60">60 fps</option>
+            <option value="30">30 fps</option>
+            <option value="24">24 fps</option>
+            <option value="15">15 fps</option>
+          </select>
+        </div>
+        <div>
+          <label>Qualidade (CRF)</label>
+          <select id="crf">
+            <option value="18">18 — máxima</option>
+            <option value="23" selected>23 — padrão</option>
+            <option value="28">28 — boa</option>
+            <option value="32">32 — econômica</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="option-row" id="opcoesAudio" style="display:none;">
+        <div>
+          <label>Bitrate</label>
+          <select id="audioBitrate">
+            <option value="320k">320 kbps</option>
+            <option value="256k">256 kbps</option>
+            <option value="192k" selected>192 kbps</option>
+            <option value="128k">128 kbps</option>
+            <option value="96k">96 kbps</option>
+            <option value="64k">64 kbps</option>
+          </select>
+        </div>
+        <div>
+          <label>Sample rate</label>
+          <select id="audioSampleRate">
+            <option value="44100" selected>44.1 kHz</option>
+            <option value="48000">48 kHz</option>
+            <option value="22050">22 kHz</option>
+            <option value="16000">16 kHz</option>
+          </select>
+        </div>
+        <div>
+          <label>Canais</label>
+          <select id="audioChannels">
+            <option value="2" selected>Estéreo</option>
+            <option value="1">Mono</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="option-row" id="opcoesImagem" style="display:none;">
+        <div>
+          <label>Largura (px)</label>
+          <input type="number" id="imgLargura" placeholder="ex: 1920">
+        </div>
+        <div>
+          <label>Altura (px)</label>
+          <input type="number" id="imgAltura" placeholder="ex: 1080">
+        </div>
+        <div>
+          <label>Qualidade JPEG/WebP (1-100)</label>
+          <input type="number" id="imgQualidade" value="92" min="1" max="100">
+        </div>
+      </div>
+
+      <div class="option-row" id="opcoesTempo" style="display:none; margin-top: 12px;">
+        <div class="time-inputs">
+          <div>
+            <label>Início (HH:MM:SS)</label>
+            <input type="text" id="tempoInicio" placeholder="00:00:00">
+          </div>
+          <div>
+            <label>Fim (HH:MM:SS)</label>
+            <input type="text" id="tempoFim" placeholder="00:01:00">
+          </div>
+        </div>
+      </div>
+
+      <label style="margin-top: 12px;">
+        <input type="checkbox" id="checkCortar" style="width:auto; margin-right:6px;">
+        Cortar trecho (só converter o intervalo acima)
+      </label>
+
+      <label style="margin-top: 8px;">
+        <input type="checkbox" id="checkExtrairAudio" style="width:auto; margin-right:6px;">
+        Extrair apenas o áudio (ignora formato de saída escolhido)
+      </label>
+
+      <label>Nome do arquivo de saída (sem extensão)</label>
+      <input type="text" id="outputName" placeholder="arquivo_convertido">
+    </div>
+  </div>
+
+  <!-- PASSO 3 -->
+  <div class="card" id="stepConvert" style="display:none;">
+    <h3>3. Converter</h3>
+    <button id="btnConverter">🚀 Iniciar conversão →</button>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Preparando FFmpeg...</div>
+    </div>
+
+    <div class="log" id="logBox"></div>
+  </div>
+
+  <!-- PASSO 4 -->
+  <div class="card" id="stepResult" style="display:none;">
+    <h3>4. Resultado</h3>
+    <div class="notice-green">
+      <strong>✅ Conversão concluída!</strong>
+    </div>
+
+    <div id="previewContainer"></div>
+
+    <button class="btn-download" id="btnDownload">⬇️ Baixar arquivo →</button>
+    <button class="btn-secondary" onclick="resetar()">🔄 Converter outro arquivo →</button>
+  </div>
+
+</div>
+
+<script>
+// ========== ESTADO ==========
+let arquivoAtual = null;
+let formatoSaida = null;
+let categoriaAtual = 'video';
+let ffmpeg = null;
+let ffmpegCarregado = false;
+
+// ========== LOG ==========
+const logBox = document.getElementById('logBox');
+function log(msg, tipo = '') {
+  const line = document.createElement('div');
+  line.className = 'line ' + tipo;
+  line.textContent = `[${new Date().toLocaleTimeString('pt-BR')}] ${msg}`;
+  logBox.appendChild(line);
+  logBox.scrollTop = logBox.scrollHeight;
+  logBox.classList.add('show');
+}
+
+// ========== UPLOAD ==========
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  if (file.size > 2 * 1024 * 1024 * 1024) {
+    alert('Arquivo maior que 2GB. O navegador não suporta.');
+    return;
+  }
+
+  arquivoAtual = file;
+
+  const info = document.getElementById('fileInfo');
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileMeta').textContent =
+    `${(file.size / 1024 / 1024).toFixed(2)} MB · ${file.type || 'tipo desconhecido'} · modificado ${new Date(file.lastModified).toLocaleDateString('pt-BR')}`;
+  info.classList.add('show');
+
+  // sugere nome de saída baseado no original
+  const base = file.name.replace(/\.[^.]+$/, '');
+  document.getElementById('outputName').value = base;
+
+  // detecta categoria provável
+  const tipo = file.type || '';
+  if (tipo.startsWith('image/')) {
+    mostrarCategoria('image');
+  } else if (tipo.startsWith('audio/')) {
+    mostrarCategoria('audio');
+  } else {
+    mostrarCategoria('video');
+  }
+
+  // mostra opções
+  document.getElementById('stepOptions').style.display = 'block';
+  document.getElementById('stepConvert').style.display = 'block';
+  document.getElementById('stepResult').style.display = 'none';
+  logBox.innerHTML = '';
+  logBox.classList.remove('show');
+}
+
+// ========== CATEGORIAS E FORMATOS ==========
+function mostrarCategoria(cat, btn) {
+  categoriaAtual = cat;
+
+  document.querySelectorAll('.category-content').forEach(el => el.style.display = 'none');
+  document.getElementById('cat-' + cat).style.display = 'block';
+
+  // atualiza botão ativo
+  document.querySelectorAll('.tabs-inner button').forEach(b => b.classList.remove('active'));
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // quando chamado programaticamente
+    const labels = { video: '🎬 Vídeo', audio: '🎵 Áudio', image: '🖼️ Imagem' };
+    document.querySelectorAll('.tabs-inner button').forEach(b => {
+      if (b.textContent.trim() === labels[cat]) b.classList.add('active');
+    });
+  }
+
+  // limpa seleção anterior
+  formatoSaida = null;
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('selected'));
+
+  // mostra opções avançadas
+  document.getElementById('opcoesAvancadas').style.display = 'block';
+  document.getElementById('opcoesVideo').style.display = cat === 'video' ? 'grid' : 'none';
+  document.getElementById('opcoesAudio').style.display = (cat === 'audio' || cat === 'video') ? 'grid' : 'none';
+  document.getElementById('opcoesImagem').style.display = cat === 'image' ? 'grid' : 'none';
+  document.getElementById('opcoesTempo').style.display = cat !== 'image' ? 'grid' : 'none';
+}
+
+function selecionarFormato(btn) {
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  formatoSaida = btn.dataset.format;
+  log(`Formato selecionado: .${formatoSaida}`);
+}
+
+// ========== FFMPEG ==========
+async function carregarFFmpeg() {
+  if (ffmpegCarregado) return ffmpeg;
+
+  log('Carregando FFmpeg.wasm (primeira vez baixa ~30MB)...');
+
+  const { FFmpeg } = FFmpegWASM;
+  const { toBlobURL, fetchFile } = FFmpegUtil;
+
+  ffmpeg = new FFmpeg();
+
+  ffmpeg.on('log', ({ message }) => {
+    log(message);
+  });
+
+  ffmpeg.on('progress', ({ progress, time }) => {
+    const pct = Math.min(Math.round(progress * 100), 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent =
+      `Convertendo... ${pct}% (tempo processado: ${(time / 1000000).toFixed(1)}s)`;
+  });
+
+  const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+  await ffmpeg.load({
+    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+  });
+
+  ffmpegCarregado = true;
+  log('FFmpeg.wasm carregado.', 'ok');
+  return ffmpeg;
+}
+
+// ========== CONVERSÃO ==========
+document.getElementById('btnConverter').addEventListener('click', converter);
+
+async function converter() {
+  if (!arquivoAtual) {
+    alert('Selecione um arquivo primeiro.');
+    return;
+  }
+
+  const btn = document.getElementById('btnConverter');
+  btn.disabled = true;
+
+  const progressContainer = document.getElementById('progressContainer');
+  progressContainer.classList.add('show');
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressText').textContent = 'Preparando...';
+  document.getElementById('stepResult').style.display = 'none';
+
+  try {
+    const ff = await carregarFFmpeg();
+
+    // Decide formato de saída
+    let formatoFinal = formatoSaida;
+    const extrairAudio = document.getElementById('checkExtrairAudio').checked;
+
+    if (extrairAudio) {
+      formatoFinal = 'mp3';
+    }
+    if (!formatoFinal) {
+      formatoFinal = categoriaAtual === 'image' ? 'png' : (categoriaAtual === 'audio' ? 'mp3' : 'mp4');
+      log(`Nenhum formato selecionado — usando .${formatoFinal} como padrão.`);
+    }
+
+    // Nome de saída
+    const nomeBase = document.getElementById('outputName').value.trim() || 'arquivo_convertido';
+    const nomeSaida = `${nomeBase}.${formatoFinal}`;
+    const nomeEntrada = 'input_' + arquivoAtual.name;
+
+    log(`Lendo arquivo: ${arquivoAtual.name}`);
+    await ff.writeFile(nomeEntrada, await FFmpegUtil.fetchFile(arquivoAtual));
+
+    // Monta argumentos FFmpeg
+    const args = [];
+
+    // Corte por tempo
+    const cortar = document.getElementById('checkCortar').checked;
+    if (cortar) {
+      const ini = document.getElementById('tempoInicio').value.trim();
+      const fim = document.getElementById('tempoFim').value.trim();
+      if (ini) { args.push('-ss', ini); }
+      if (fim) { args.push('-to', fim); }
+      log(`Corte: ${ini || '0'} → ${fim || 'fim'}`);
+    }
+
+    args.push('-i', nomeEntrada);
+
+    // Parâmetros por tipo
+    if (formatoFinal === 'mp3' || formatoFinal === 'aac' || formatoFinal === 'm4a' || formatoFinal === 'ogg' || formatoFinal === 'opus' || formatoFinal === 'wma' || formatoFinal === 'ac3') {
+      const bitrate = document.getElementById('audioBitrate').value;
+      const sr = document.getElementById('audioSampleRate').value;
+      const ch = document.getElementById('audioChannels').value;
+      args.push('-vn');
+      args.push('-ar', sr);
+      args.push('-ac', ch);
+      if (formatoFinal === 'mp3' || formatoFinal === 'aac' || formatoFinal === 'm4a' || formatoFinal === 'ogg' || formatoFinal === 'opus' || formatoFinal === 'wma' || formatoFinal === 'ac3') {
+        args.push('-b:a', bitrate);
+      }
+      if (formatoFinal === 'mp3') {
+        args.push('-codec:a', 'libmp3lame');
+      }
+      if (formatoFinal === 'aac' || formatoFinal === 'm4a') {
+        args.push('-codec:a', 'aac');
+      }
+      if (formatoFinal === 'ogg') {
+        args.push('-codec:a', 'libvorbis');
+      }
+      if (formatoFinal === 'opus') {
+        args.push('-codec:a', 'libopus');
+      }
+      if (formatoFinal === 'flac') {
+        args.push('-codec:a', 'flac');
+      }
+      if (formatoFinal === 'wav') {
+        args.push('-codec:a', 'pcm_s16le');
+      }
+      if (formatoFinal === 'aiff') {
+        args.push('-codec:a', 'pcm_s16be');
+      }
+    } else if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'tiff', 'gif', 'ico', 'ppm'].includes(formatoFinal)) {
+      const w = document.getElementById('imgLargura').value;
+      const h = document.getElementById('imgAltura').value;
+      const q = document.getElementById('imgQualidade').value || 92;
+      if (w || h) {
+        const escala = `scale=${w || -1}:${h || -1}`;
+        args.push('-vf', escala);
+      }
+      if (['jpg', 'jpeg', 'webp'].includes(formatoFinal)) {
+        args.push('-q:v', Math.round((100 - q) / 3));
+      }
+    } else {
+      // vídeo
+      const res = document.getElementById('resolucao').value;
+      const fps = document.getElementById('fps').value;
+      const crf = document.getElementById('crf').value || 23;
+      if (res) args.push('-vf', `scale=${res.replace(':', ':')}`);
+      if (fps) args.push('-r', fps);
+      if (['mp4', 'mkv', 'mov', 'm4v'].includes(formatoFinal)) {
+        args.push('-c:v', 'libx264');
+        args.push('-crf', crf);
+        args.push('-preset', 'medium');
+        args.push('-c:a', 'aac');
+      } else if (formatoFinal === 'webm') {
+        args.push('-c:v', 'libvpx-vp9');
+        args.push('-crf', crf);
+        args.push('-b:v', '0');
+        args.push('-c:a', 'libopus');
+      } else if (formatoFinal === 'ogv') {
+        args.push('-c:v', 'libtheora');
+        args.push('-c:a', 'libvorbis');
+      } else {
+        args.push('-c:v', 'libx264');
+        args.push('-crf', crf);
+        args.push('-c:a', 'aac');
+      }
+    }
+
+    args.push('-y', nomeSaida);
+
+    log('Executando: ffmpeg ' + args.join(' '));
+
+    await ff.exec(args);
+
+    log('Conversão concluída. Lendo arquivo de saída...', 'ok');
+    const data = await ff.readFile(nomeSaida);
+    const blob = new Blob([data.buffer], { type: getMimeType(formatoFinal) });
+
+    // Preview
+    const previewContainer = document.getElementById('previewContainer');
+    previewContainer.innerHTML = '';
+
+    if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'tiff', 'gif', 'ico', 'ppm'].includes(formatoFinal)) {
+      const url = URL.createObjectURL(blob);
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'preview';
+      previewContainer.appendChild(img);
+    } else if (['mp3', 'wav', 'ogg', 'opus', 'flac', 'm4a', 'aac', 'wma', 'ac3', 'aiff', 'amr', 'au'].includes(formatoFinal)) {
+      const url = URL.createObjectURL(blob);
+      const audio = document.createElement('audio');
+      audio.controls = true;
+      audio.src = url;
+      previewContainer.appendChild(audio);
+    } else {
+      const url = URL.createObjectURL(blob);
+      const video = document.createElement('video');
+      video.controls = true;
+      video.src = url;
+      previewContainer.appendChild(video);
+    }
+
+    // Botão de download
+    document.getElementById('btnDownload').onclick = () => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nomeSaida;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    };
+
+    document.getElementById('stepResult').style.display = 'block';
+    document.getElementById('progressText').textContent = 'Concluído!';
+    document.getElementById('progressFill').style.width = '100%';
+    log('Arquivo pronto para download: ' + nomeSaida, 'ok');
+
+  } catch (e) {
+    log('Erro: ' + e.message, 'err');
+    document.getElementById('progressText').textContent = '❌ Erro: ' + e.message;
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function getMimeType(ext) {
+  const map = {
+    mp4: 'video/mp4', webm: 'video/webm', mkv: 'video/x-matroska',
+    mov: 'video/quicktime', avi: 'video/x-msvideo', flv: 'video/x-flv',
+    wmv: 'video/x-ms-wmv', '3gp': 'video/3gpp', ogv: 'video/ogg',
+    ts: 'video/mp2t', m4v: 'video/x-m4v',
+    mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+    opus: 'audio/opus', flac: 'audio/flac', m4a: 'audio/mp4',
+    aac: 'audio/aac', wma: 'audio/x-ms-wma', ac3: 'audio/ac3',
+    aiff: 'audio/aiff', amr: 'audio/amr', au: 'audio/basic',
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    webp: 'image/webp', bmp: 'image/bmp', tiff: 'image/tiff',
+    gif: 'image/gif', ico: 'image/x-icon', ppm: 'image/x-portable-pixmap'
+  };
+  return map[ext] || 'application/octet-stream';
+}
+
+function resetar() {
+  arquivoAtual = null;
+  formatoSaida = null;
+  fileInput.value = '';
+  document.getElementById('fileInfo').classList.remove('show');
+  document.getElementById('stepOptions').style.display = 'none';
+  document.getElementById('stepConvert').style.display = 'none';
+  document.getElementById('stepResult').style.display = 'none';
+  document.getElementById('progressContainer').classList.remove('show');
+  document.getElementById('progressFill').style.width = '0%';
+  logBox.innerHTML = '';
+  logBox.classList.remove('show');
+  document.getElementById('previewContainer').innerHTML = '';
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('selected'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+<!-- FFmpeg.wasm -->
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
+</body>
+</html>
